@@ -7,6 +7,12 @@ authors = ["The Teaclave Authors"]
 name = "helloworldsampleenclave"
 crate-type = ["staticlib"]
 
+[dependencies]
+wasmi = "*"
+parity-wasm = "*"
+pwasm-utils = "*"
+#, default-features = false, features = "core" }
+
 [features]
 default = []
 
