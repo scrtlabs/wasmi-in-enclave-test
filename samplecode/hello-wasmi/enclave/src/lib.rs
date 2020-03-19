@@ -29,6 +29,7 @@ extern crate sgx_tstd as std;
 
 // extern crate parity_wasm;
 extern crate wasmi;
+extern crate wabt;
 
 // use parity_wasm::elements::{External, FunctionType, Internal, Type, ValueType};
 use wasmi::{ImportsBuilder, ModuleInstance, NopExternals, RuntimeValue};
@@ -50,6 +51,44 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     // println!("{}", &hello_string);
 
     let _ = backtrace::enable_backtrace("enclave.signed.so", PrintFormat::Full);
+
+    // Parse WAT (WebAssembly Text format) into wasm bytecode.
+    let wasm_binary: Vec<u8> =
+        wabt::wat2wasm(
+            r#"
+            (module
+                (func (export "test") (result i32)
+                    i32.const 1337
+                )
+            )
+            "#,
+        )
+        .expect("failed to parse wat");
+
+    // Load wasm binary and prepare it for instantiation.
+    let module = wasmi::Module::from_buffer(&wasm_binary)
+        .expect("failed to load wasm");
+
+    // Instantiate a module with empty imports and
+    // assert that there is no `start` function.
+    let instance =
+        ModuleInstance::new(
+            &module,
+            &ImportsBuilder::default()
+        )
+        .expect("failed to instantiate wasm module")
+        .assert_no_start();
+
+    // Finally, invoke the exported function "test" with no parameters
+    // and empty external function executor.
+    assert_eq!(
+        instance.invoke_export(
+            "test",
+            &[],
+            &mut NopExternals,
+        ).expect("failed to execute export"),
+        Some(RuntimeValue::I32(1337)),
+    );
 
     sgx_status_t::SGX_SUCCESS
 }
