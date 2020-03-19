@@ -27,10 +27,10 @@ extern crate sgx_trts;
 #[macro_use]
 extern crate sgx_tstd as std;
 
-extern crate parity_wasm;
+// extern crate parity_wasm;
 extern crate wasmi;
 
-use parity_wasm::elements::{External, FunctionType, Internal, Type, ValueType};
+// use parity_wasm::elements::{External, FunctionType, Internal, Type, ValueType};
 use wasmi::{ImportsBuilder, ModuleInstance, NopExternals, RuntimeValue};
 
 use sgx_types::*;
@@ -47,7 +47,7 @@ use std::backtrace::{self, PrintFormat};
 pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_status_t {
 
     // Ocall to normal world for output
-    println!("{}", &hello_string);
+    // println!("{}", &hello_string);
 
     let _ = backtrace::enable_backtrace("enclave.signed.so", PrintFormat::Full);
 

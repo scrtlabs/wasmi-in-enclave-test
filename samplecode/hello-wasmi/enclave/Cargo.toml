@@ -8,10 +8,8 @@ name = "helloworldsampleenclave"
 crate-type = ["staticlib"]
 
 [dependencies]
-wasmi = "*"
-parity-wasm = "*"
-pwasm-utils = "*"
-#, default-features = false, features = "core" }
+# wasmi = { version = "*", default-features = false, features = ["core"] }
+wasmi = { git = "https://github.com/paritytech/wasmi", branch = "master", default-features = false, features = ["core"] }
 
 [features]
 default = []
