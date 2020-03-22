@@ -41,4 +41,4 @@ sgx_unwind/libunwind/configure
 sgx_unwind/libunwind/src/Makefile.in
 
 #sample bins
-samplecode/hello-wasmi/bin/app
+samplecode/*/bin
