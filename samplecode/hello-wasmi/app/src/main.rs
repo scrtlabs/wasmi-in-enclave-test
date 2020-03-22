@@ -17,9 +17,9 @@
 
 extern crate sgx_types;
 extern crate sgx_urts;
+extern crate wabt;
 use sgx_types::*;
 use sgx_urts::SgxEnclave;
-
 static ENCLAVE_FILE: &'static str = "enclave.signed.so";
 
 extern {
@@ -53,15 +53,28 @@ fn main() {
         },
     };
 
-    let input_string = String::from("This is a normal world string passed into Enclave!\n");
+    let wasm_binary: Vec<u8> =
+    wabt::wat2wasm(
+        r#"
+        (module
+            (func (export "test") (result i32)
+                i32.const 1337
+            )
+        )
+        "#,
+    )
+    .expect("failed to parse wat");
+
+    // let input_string = String::from("This is a normal world string passed into Enclave!\n");
     let mut retval = sgx_status_t::SGX_SUCCESS;
 
     let result = unsafe {
         say_something(enclave.geteid(),
                       &mut retval,
-                      input_string.as_ptr() as * const u8,
-                      input_string.len())
+                      (&*wasm_binary).as_ptr() as * const u8,
+                      wasm_binary.len())
     };
+    
     match result {
         sgx_status_t::SGX_SUCCESS => {},
         _ => {
