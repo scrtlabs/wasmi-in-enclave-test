@@ -65,10 +65,10 @@ fn main() {
     let wasm_binary: Vec<u8> = wabt::wat2wasm(
         r#"
         (module
-            (import "env" "__get_the_number_two" (func get_the_number_two (result i32)))
+            (func $x (import "env" "get_the_number_two") (result i32))
 
             (func (export "test") (result i32)
-                (get_the_number_two)
+                ($x)
             )
         )
         "#,

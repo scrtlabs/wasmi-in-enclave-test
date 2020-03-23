@@ -106,7 +106,7 @@ impl ModuleImportResolver for ResolveAll {
         signature: &Signature,
     ) -> Result<FuncRef, InterpreterError> {
         let func_ref = match _field_name {
-            "__get_the_number_two" => FuncInstance::alloc_host(
+            "get_the_number_two" => FuncInstance::alloc_host(
                 Signature::new(&[][..], Some(ValueType::I32)),
                 GET_TWO_INDEX,
             ),
