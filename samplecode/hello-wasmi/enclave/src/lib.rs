@@ -74,7 +74,7 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
         instance
             .invoke_export("test", &[], &mut runtime)
             .expect("failed to execute export"),
-        Some(RuntimeValue::I32(1339)),
+        Some(RuntimeValue::I32(2)),
     );
 
     sgx_status_t::SGX_SUCCESS
@@ -100,7 +100,11 @@ impl Externals for Runtime {
 struct ResolveAll;
 
 impl ModuleImportResolver for ResolveAll {
-    fn resolve_func(&self, _field_name: &str, signature: &Signature) -> Result<FuncRef, InterpreterError> {
+    fn resolve_func(
+        &self,
+        _field_name: &str,
+        signature: &Signature,
+    ) -> Result<FuncRef, InterpreterError> {
         let func_ref = match _field_name {
             "__get_the_number_two" => FuncInstance::alloc_host(
                 Signature::new(&[][..], Some(ValueType::I32)),
