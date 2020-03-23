@@ -91,7 +91,7 @@ impl Externals for Runtime {
         args: RuntimeArgs,
     ) -> Result<Option<RuntimeValue>, Trap> {
         match index {
-            GET_TWO_INDEX => Ok(2),
+            GET_TWO_INDEX => Ok(Some(RuntimeValue::I32(2))),
             _ => panic!("unknown function index"),
         }
     }
@@ -109,7 +109,7 @@ impl ModuleImportResolver for ResolveAll {
             _ => {
                 return Err(InterpreterError::Function(format!(
                     "host module doesn't export function with name {}",
-                    _field_name.to_string()
+                    _field_name
                 )));
             }
         };
