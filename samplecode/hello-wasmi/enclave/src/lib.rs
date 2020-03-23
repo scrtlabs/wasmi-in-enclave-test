@@ -32,8 +32,9 @@ extern crate wasmi;
 
 // use parity_wasm::elements::{External, FunctionType, Internal, Type, ValueType};
 use wasmi::{
-    FuncInstance, FuncRef, ImportsBuilder, InterpreterError, ModuleInstance, NopExternals,
-    RuntimeValue, Signature, ValueType,
+    Error as InterpreterError, Externals, FuncInstance, FuncRef, HostError, ImportsBuilder,
+    ModuleImportResolver, ModuleInstance, ModuleRef, RuntimeArgs, RuntimeValue, Signature, Trap,
+    ValueType,
 };
 
 use sgx_trts::enclave;
