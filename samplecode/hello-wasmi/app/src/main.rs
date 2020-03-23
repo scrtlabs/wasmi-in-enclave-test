@@ -68,7 +68,7 @@ fn main() {
             (func $x (import "env" "get_the_number_two") (result i32))
 
             (func (export "test") (result i32)
-                ($x)
+                call $x
             )
         )
         "#,
