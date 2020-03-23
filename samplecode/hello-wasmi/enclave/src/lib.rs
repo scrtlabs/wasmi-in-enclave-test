@@ -59,6 +59,7 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     let module = wasmi::Module::from_buffer(&slice).expect("failed to load wasm");
 
     let imports = ImportsBuilder::new().with_resolver("get_the_number_two", &ResolveAll);
+    let mut runtime = Runtime {};
 
     // Instantiate a module with empty imports and
     // assert that there is no `start` function.
@@ -70,7 +71,7 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     // and empty external function executor.
     assert_eq!(
         instance
-            .invoke_export("test", &[], &mut NopExternals,)
+            .invoke_export("test", &[], &mut runtime)
             .expect("failed to execute export"),
         Some(RuntimeValue::I32(1339)),
     );
@@ -78,14 +79,32 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     sgx_status_t::SGX_SUCCESS
 }
 
+struct Runtime;
+
+const GET_TWO_INDEX: usize = 0;
+
+impl Externals for Runtime {
+    fn invoke_index(
+        &mut self,
+        index: usize,
+        args: RuntimeArgs,
+    ) -> Result<Option<RuntimeValue>, Trap> {
+        match index {
+            GET_TWO_INDEX => Ok(2),
+            _ => panic!("unknown function index"),
+        }
+    }
+}
+
 struct ResolveAll;
 
 impl ModuleImportResolver for ResolveAll {
     fn resolve_func(&self, _field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
         let func_ref = match field_name {
-            "__get_the_number_two" => {
-                FuncInstance::alloc_host(Signature::new(&[][..], Some(ValueType::I32)), 0)
-            }
+            "__get_the_number_two" => FuncInstance::alloc_host(
+                Signature::new(&[][..], Some(ValueType::I32)),
+                GET_TWO_INDEX,
+            ),
             _ => {
                 return Err(InterpreterError::Function(format!(
                     "host module doesn't export function with name {}",
@@ -95,8 +114,4 @@ impl ModuleImportResolver for ResolveAll {
         };
         Ok(func_ref)
     }
-}
-
-fn get_the_number_two() -> i32 {
-    2
 }

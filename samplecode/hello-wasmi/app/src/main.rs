@@ -68,7 +68,7 @@ fn main() {
             (import "env" "__get_the_number_two" (func $get_the_number_two (param) (result i32)))
 
             (func (export "test") (result i32)
-                (i32.add i32.const 1337 (get_the_number_two))
+                (i32.add i32.const 1337 ($get_the_number_two))
             )
         )
         "#,
