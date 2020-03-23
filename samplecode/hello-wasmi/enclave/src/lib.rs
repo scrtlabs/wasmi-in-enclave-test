@@ -59,7 +59,7 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     // Load wasm binary and prepare it for instantiation.
     let module = wasmi::Module::from_buffer(&slice).expect("failed to load wasm");
 
-    let imports = ImportsBuilder::new().with_resolver("get_the_number_two", &ResolveAll);
+    let imports = ImportsBuilder::new().with_resolver("env", &ResolveAll);
     let mut runtime = Runtime {};
 
     // Instantiate a module with empty imports and
