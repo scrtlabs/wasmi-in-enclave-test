@@ -100,8 +100,8 @@ impl Externals for Runtime {
 struct ResolveAll;
 
 impl ModuleImportResolver for ResolveAll {
-    fn resolve_func(&self, _field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
-        let func_ref = match field_name {
+    fn resolve_func(&self, _field_name: &str, signature: &Signature) -> Result<FuncRef, InterpreterError> {
+        let func_ref = match _field_name {
             "__get_the_number_two" => FuncInstance::alloc_host(
                 Signature::new(&[][..], Some(ValueType::I32)),
                 GET_TWO_INDEX,
@@ -109,7 +109,7 @@ impl ModuleImportResolver for ResolveAll {
             _ => {
                 return Err(InterpreterError::Function(format!(
                     "host module doesn't export function with name {}",
-                    field_name.to_string()
+                    _field_name.to_string()
                 )));
             }
         };
