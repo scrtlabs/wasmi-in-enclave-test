@@ -31,7 +31,10 @@ extern crate wasmi;
 // extern crate wabt;
 
 // use parity_wasm::elements::{External, FunctionType, Internal, Type, ValueType};
-use wasmi::{ImportsBuilder, ModuleInstance, NopExternals, RuntimeValue};
+use wasmi::{
+    FuncInstance, FuncRef, ImportsBuilder, ModuleInstance, NopExternals, RuntimeValue, Signature,
+    ValueType,
+};
 
 use sgx_trts::enclave;
 use sgx_types::metadata::*;
@@ -48,27 +51,52 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     // Ocall to normal world for output
     // println!("{}", &hello_string);
 
-    // let _ = backtrace::enable_backtrace("enclave.signed.so", PrintFormat::Full);
+    let _ = backtrace::enable_backtrace("enclave.signed.so", PrintFormat::Full);
 
     let slice = unsafe { slice::from_raw_parts(some_string, some_len) };
 
-    // // Load wasm binary and prepare it for instantiation.
+    // Load wasm binary and prepare it for instantiation.
     let module = wasmi::Module::from_buffer(&slice).expect("failed to load wasm");
+
+    let imports = ImportsBuilder::new().with_resolver("get_the_number_two", &ResolveAll);
 
     // Instantiate a module with empty imports and
     // assert that there is no `start` function.
-    let instance = ModuleInstance::new(&module, &ImportsBuilder::default())
+    let instance = ModuleInstance::new(&module, &imports)
         .expect("failed to instantiate wasm module")
         .assert_no_start();
 
-    // // Finally, invoke the exported function "test" with no parameters
-    // // and empty external function executor.
+    // Finally, invoke the exported function "test" with no parameters
+    // and empty external function executor.
     assert_eq!(
         instance
             .invoke_export("test", &[], &mut NopExternals,)
             .expect("failed to execute export"),
-        Some(RuntimeValue::I32(1337)),
+        Some(RuntimeValue::I32(1339)),
     );
 
     sgx_status_t::SGX_SUCCESS
+}
+
+struct ResolveAll;
+
+impl ModuleImportResolver for ResolveAll {
+    fn resolve_func(&self, _field_name: &str, signature: &Signature) -> Result<FuncRef, Error> {
+        let func_ref = match field_name {
+            "__get_the_number_two" => {
+                FuncInstance::alloc_host(Signature::new(&[][..], Some(ValueType::I32)), 0)
+            }
+            _ => {
+                return Err(InterpreterError::Function(format!(
+                    "host module doesn't export function with name {}",
+                    field_name.to_string()
+                )));
+            }
+        };
+        Ok(func_ref)
+    }
+}
+
+fn get_the_number_two() -> i32 {
+    2
 }
