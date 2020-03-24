@@ -27,6 +27,6 @@ enclave {
     };
 
     untrusted {
-        sgx_status_t ocall_banana(int32_t banana);
+        void ocall_banana(int32_t banana);
     };
 };

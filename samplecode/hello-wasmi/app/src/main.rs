@@ -98,7 +98,6 @@ fn main() {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ocall_banana(banana: i32) -> sgx_types::sgx_status_t {
+pub unsafe extern "C" fn ocall_banana(banana: i32) {
     println!("[+] Number passed from enclave: {}", banana);
-    sgx_status_t::SGX_SUCCESS
 }

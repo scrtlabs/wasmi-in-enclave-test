@@ -45,7 +45,7 @@ use std::string::String;
 use std::vec::Vec;
 
 extern "C" {
-    pub fn ocall_banana(banana: i32) -> sgx_status_t;
+    pub fn ocall_banana(banana: i32);
 }
 
 #[no_mangle]
