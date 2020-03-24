@@ -78,7 +78,6 @@ fn main() {
     // let input_string = String::from("This is a normal world string passed into Enclave!\n");
     let mut retval = sgx_status_t::SGX_SUCCESS;
 
-    println!("wasm binary size: {}", wasm_binary.len());
     let result = unsafe {
         say_something(
             enclave.geteid(),
@@ -94,6 +93,12 @@ fn main() {
             return;
         }
     }
-    println!("[+] say_something success...");
+    println!("[+] Success...");
     enclave.destroy();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ocall_banana(banana: &mut usize) -> sgx_types::sgx_status_t {
+    println!("[+] Number passed from enclave: {}", *banana);
+    sgx_status_t::SGX_SUCCESS
 }

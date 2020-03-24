@@ -26,11 +26,8 @@ extern crate sgx_types;
 #[macro_use]
 extern crate sgx_tstd as std;
 
-// extern crate parity_wasm;
 extern crate wasmi;
-// extern crate wabt;
 
-// use parity_wasm::elements::{External, FunctionType, Internal, Type, ValueType};
 use wasmi::{
     Error as InterpreterError, Externals, FuncInstance, FuncRef, HostError, ImportsBuilder,
     ModuleImportResolver, ModuleInstance, ModuleRef, RuntimeArgs, RuntimeValue, Signature, Trap,
@@ -46,6 +43,10 @@ use std::io::{self, Write};
 use std::slice;
 use std::string::String;
 use std::vec::Vec;
+
+extern "C" {
+    pub fn ocall_banana(banana: *mut usize) -> sgx_status_t;
+}
 
 #[no_mangle]
 pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_status_t {
@@ -76,6 +77,11 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
             .expect("failed to execute export"),
         Some(RuntimeValue::I32(2)),
     );
+
+    let mut x: usize = 3;
+    unsafe {
+        ocall_banana(&mut x);
+    }
 
     sgx_status_t::SGX_SUCCESS
 }
