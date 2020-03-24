@@ -45,7 +45,7 @@ use std::string::String;
 use std::vec::Vec;
 
 extern "C" {
-    pub fn ocall_banana(banana: *mut usize) -> sgx_status_t;
+    pub fn ocall_banana(banana: i32) -> sgx_status_t;
 }
 
 #[no_mangle]
@@ -78,9 +78,9 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
         Some(RuntimeValue::I32(2)),
     );
 
-    let mut x: usize = 3;
+    // let mut x: usize = 3;
     unsafe {
-        ocall_banana(&mut x);
+        ocall_banana(3);
     }
 
     sgx_status_t::SGX_SUCCESS
