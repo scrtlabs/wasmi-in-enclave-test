@@ -93,12 +93,12 @@ fn main() {
             return;
         }
     }
-    println!("[+] Success...");
+    println!("[+] Success!");
     enclave.destroy();
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn ocall_banana(banana: &mut usize) -> sgx_types::sgx_status_t {
-    println!("[+] Number passed from enclave: {}", *banana);
+    println!("[+] Number passed from enclave: {}", banana);
     sgx_status_t::SGX_SUCCESS
 }
