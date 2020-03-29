@@ -27,12 +27,17 @@ extern crate sgx_types;
 extern crate sgx_tstd as std;
 
 extern crate wasmi;
+extern crate parity_wasm;
+extern crate pwasm_utils;
 
 use wasmi::{
     Error as InterpreterError, Externals, FuncInstance, FuncRef, HostError, ImportsBuilder,
     ModuleImportResolver, ModuleInstance, ModuleRef, RuntimeArgs, RuntimeValue, Signature, Trap,
     ValueType,
 };
+
+mod gas;
+pub use gas::{gas_rules, WasmCosts, RuntimeWasmCosts};
 
 use sgx_trts::enclave;
 use sgx_types::metadata::*;
@@ -58,14 +63,29 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     let slice = unsafe { slice::from_raw_parts(some_string, some_len) };
 
     // Load wasm binary and prepare it for instantiation.
-    let module = wasmi::Module::from_buffer(&slice).expect("failed to load wasm");
+    // let module = wasmi::Module::from_buffer(&slice).expect("failed to load wasm");
+    let module = match parity_wasm::elements::deserialize_buffer(&slice) {
+        Ok(module) => module,
+        Err(module) => panic!("LALALALA")
+    };
 
+    let wasm_costs = WasmCosts::default();
+    let gas_module = match pwasm_utils::inject_gas_counter(module, &gas_rules(&wasm_costs)){
+        Ok(gas_module) => gas_module,
+        Err(gas_module) => panic!("LALALALA")
+    };
+    
     let imports = ImportsBuilder::new().with_resolver("env", &ResolveAll);
     let mut runtime = Runtime {};
 
+    let wasmi_module = match wasmi::Module::from_parity_wasm_module(gas_module){
+        Ok(wasmi_module) => wasmi_module,
+        Err(wasmi_module) => panic!("LALALALA")
+    };
+
     // Instantiate a module with empty imports and
     // assert that there is no `start` function.
-    let instance = ModuleInstance::new(&module, &imports)
+    let instance = ModuleInstance::new(&wasmi_module, &imports)
         .expect("failed to instantiate wasm module")
         .assert_no_start();
 
